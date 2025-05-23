@@ -1,0 +1,11 @@
+name: Linting
+
+on:
+  workflow_call:
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm execution
+        run: echo "✅ Reusable workflow was called!"
