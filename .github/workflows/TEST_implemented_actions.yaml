@@ -1,0 +1,11 @@
+name: Call Workflow
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    uses: woped/devops/.github/workflows/linting.yaml@main
