@@ -9,18 +9,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Check for pom.xml
+        id: check_pom
+        run: |
+          if git ls-files '**/pom.xml' | grep -q '.'; then
+            echo "pom.xml found"
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "No pom.xml found"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up JDK 17
+        if: steps.check_pom.outputs.found == 'true'
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Cache Maven packages
+        if: steps.check_pom.outputs.found == 'true'
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build with Maven
+        if: steps.check_pom.outputs.found == 'true'
         run: mvn -B clean install
+
       - name: Run tests
+        if: steps.check_pom.outputs.found == 'true'
         run: mvn test
