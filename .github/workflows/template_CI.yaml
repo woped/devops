@@ -9,3 +9,4 @@ on:
 jobs:
   linting:
     uses: woped/devops/.github/workflows/linting.yaml@main
+    uses: woped/devops/.github/workflows/test_maven.yaml@main
