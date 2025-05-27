@@ -2,6 +2,6 @@ package com.example;
 
 public class App {
     public static String greet() {
-        return "Hello, World!";
+        return "Hello, World! 2";
     }
 }
