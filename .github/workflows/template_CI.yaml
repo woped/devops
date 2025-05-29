@@ -7,7 +7,9 @@ on:
     branches: [ main, master ]
 
 jobs:
-  #linting:
-  #  uses: woped/devops/.github/workflows/linting.yaml@main
-  test_maven:
-    uses: woped/devops/.github/workflows/test_maven.yaml@main
+  linting:
+   uses: woped/devops/.github/workflows/linting.yaml@main
+  testing_maven:
+    uses: woped/devops/.github/workflows/testing_maven.yaml@main
+  testing_pytest:
+    uses: woped/devops/.github/workflows/testing_pytest.yaml@main
