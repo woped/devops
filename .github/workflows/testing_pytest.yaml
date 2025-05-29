@@ -48,6 +48,7 @@ jobs:
           else
             echo "requirements.txt not found, installing defaults"
             pip install torch torchvision torchaudio pytest
+          fi
 
       - name: Run tests
         if: steps.check_py.outputs.found == 'true'
