@@ -54,10 +54,10 @@ jobs:
         if: steps.check_py.outputs.found == 'true'
         run: |
           pytest || EXIT_CODE=$?
-          if [ "$EXIT_CODE" -eq 5 ]; then
+          if [ "$EXIT_CODE" -eq "5" ]; then
             echo "No tests were found. Skipping test phase."
             exit 0
           else
-            exit $EXIT_CODE
+            exit "$EXIT_CODE"
           fi
           
