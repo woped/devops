@@ -57,7 +57,10 @@ jobs:
           if [ "$EXIT_CODE" -eq "5" ]; then
             echo "No tests were found. Skipping test phase."
             exit 0
+          elif [ "$EXIT_CODE" -ne "0" ]; then
+            echo "Tests failed with exit code $EXIT_CODE."
+            exit $EXIT_CODE
           else
-            exit "$EXIT_CODE"
+            echo "All tests passed."
+            exit 0
           fi
-          
