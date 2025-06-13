@@ -1,4 +1,4 @@
-name: Continuous Deployment (post compatibility check)
+name: CD Pipeline (post compatibility check)
 
 permissions:
   contents: write
