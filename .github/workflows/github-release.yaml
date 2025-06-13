@@ -1,0 +1,31 @@
+name: Publish GitHub release
+
+permissions:
+  contents: write
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        required: true
+        type: string
+      RELEASE_NOTES:
+        required: true
+        type: string
+
+jobs:
+  publish_gh_release:
+    # run only if a new version is detected
+    if: ${{ inputs.VERSION != '' && inputs.VERSION != '0.0.0' }}
+    runs-on: ubuntu-latest    
+    steps:
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.VERSION }}
+          name: v${{ inputs.VERSION }}
+          body: ${{ inputs.RELEASE_NOTES }}
+          # true if the version leads to a new major release (e.g., 2.0.0)
+          draft: ${{ endsWith(inputs.VERSION, '.0.0') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
