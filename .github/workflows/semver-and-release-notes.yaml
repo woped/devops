@@ -1,0 +1,37 @@
+name: Detect next version and generate release notes
+
+on:
+  workflow_call:
+    outputs:
+      VERSION:
+        value: ${{ jobs.detect_version.outputs.VERSION}}
+      RELEASE_NOTES:
+        value: ${{ jobs.detect_version.outputs.RELEASE_NOTES }}
+
+jobs:
+  detect_version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      VERSION: ${{ steps.semver.outputs.new_release_version }}
+      RELEASE_NOTES: ${{ steps.semver.outputs.new_release_notes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'  # latest LTS version
+          
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Detect next version and generate release notes
+        id: semver
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
