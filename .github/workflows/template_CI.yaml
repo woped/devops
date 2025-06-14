@@ -14,4 +14,4 @@ jobs:
   testing_pytest:
     uses: woped/devops/.github/workflows/testing_pytest.yaml@main
   sonar_python:
-    uses: woped/devops/.github/workflows/sonar_python.yaml@feature/sonar-python
+    uses: woped/devops/.github/workflows/sonar_python.yaml@feature/python-sonar
