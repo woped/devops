@@ -50,4 +50,4 @@ jobs:
         if: steps.check_pom.outputs.found == 'true'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify  -Dsonar.organization=woped -Dsonar.projectKey=woped_${{ github.event.repository.name }}
+        run: mvn -B verify woped -Dsonar.projectKey=woped_${{ github.event.repository.name }}
