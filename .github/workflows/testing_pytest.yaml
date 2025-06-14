@@ -53,7 +53,9 @@ jobs:
       - name: Run tests
         if: steps.check_py.outputs.found == 'true'
         run: |
-          pytest || EXIT_CODE=$?
+          pip install coverage
+          coverage run -m pytest || EXIT_CODE=$?
+          coverage xml
           if [ "$EXIT_CODE" -eq "5" ]; then
             echo "No tests were found. Skipping test phase."
             exit 0
@@ -64,3 +66,9 @@ jobs:
             echo "All tests passed."
             exit 0
           fi
+      - name: Upload coverage report
+        if: steps.check_py.outputs.found == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
