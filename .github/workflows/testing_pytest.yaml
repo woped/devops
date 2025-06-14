@@ -3,14 +3,6 @@ name: Python Tests
 on:
   workflow_call:
 
-  # For testing only, trigger manually
-  workflow_dispatch:
-    inputs:
-      run_tests:
-        description: 'Run Python tests'
-        required: false
-        default: 'true'
-
 jobs:
   build:
     name: Execute Python Tests
