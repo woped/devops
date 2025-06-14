@@ -12,7 +12,7 @@ jobs:
   testing_maven:
     uses: woped/devops/.github/workflows/testing_maven.yaml@main
   testing_pytest:
-    uses: woped/devops/.github/workflows/testing_pytest.yaml@main
+    uses: woped/devops/.github/workflows/testing_pytest.yaml@feature/python-sonar
   sonar_python:
     needs: testing_pytest
     uses: woped/devops/.github/workflows/sonar_python.yaml@feature/python-sonar
