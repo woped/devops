@@ -18,6 +18,7 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false #Only check files that have changed
           VALIDATE_MARKDOWN: false
           VALIDATE_NATURAL_LANGUAGE: false
