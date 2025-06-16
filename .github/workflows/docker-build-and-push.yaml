@@ -7,6 +7,11 @@ on:
         description: 'SemVer tag (e.g., 1.2.3)'
         required: true
         type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 
 jobs:
   build-and-push:

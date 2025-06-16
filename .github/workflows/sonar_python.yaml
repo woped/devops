@@ -1,0 +1,42 @@
+name: Sonar for Python
+
+on:
+  workflow_call:
+
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Python files
+        id: check_py
+        run: |
+          if git ls-files "*.py" | grep -q "."; then
+            echo "Python files found"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Python files found"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      
+      - name: Download coverage report
+        if: steps.check_py.outputs.found == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: SonarQube Scan
+        if: steps.check_py.outputs.found == 'true'
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=woped
+            -Dsonar.projectKey=woped_${{ github.event.repository.name }}
+            -Dsonar.python.coverage.reportPaths=coverage.xml
