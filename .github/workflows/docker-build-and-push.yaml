@@ -15,8 +15,8 @@ on:
 
 jobs:
   build-and-push:
-    # run only if a new version is detected and it is not a major version
-    if: ${{ inputs.version != '' && inputs.version != '0.0.0' && !endsWith(inputs.version, '.0.0') }}
+    # run only if a new version is detected
+    if: ${{ inputs.version != '' && inputs.version != '0.0.0' }}
     runs-on: ubuntu-latest
 
     steps:
