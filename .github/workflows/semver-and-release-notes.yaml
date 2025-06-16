@@ -26,7 +26,7 @@ jobs:
           node-version: '22'  # latest LTS version
           
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Detect next version and generate release notes
         id: semver
