@@ -22,4 +22,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: false #Only check files that have changed
           VALIDATE_MARKDOWN: false #ignore readme
           VALIDATE_NATURAL_LANGUAGE: false #ignore contributing guideline
-          VALIDATE_JAVA_FORMAT: false #does not provide an option to NOT check for 80char per line
+          VALIDATE_JAVA: false #does not provide an option to NOT check for 80char per line
