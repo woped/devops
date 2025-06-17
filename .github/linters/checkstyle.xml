@@ -4,9 +4,40 @@
     "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+
+    <!-- Set global file length limit -->
+    <module name="FileLength">
+        <property name="max" value="3000"/>
+    </module>
+
+    <!-- Ensure consistent newline endings -->
+    <module name="NewlineAtEndOfFile"/>
+
     <module name="TreeWalker">
+        
+        <!-- Reasonable line length limit -->
         <module name="LineLength">
             <property name="max" value="256"/>
         </module>
+
+        <!-- Prevent * imports -->
+        <module name="AvoidStarImport"/>
+
+        <!-- Optional but encourages safe control flow -->
+        <module name="NeedBraces"/>
+
+        <!-- Optional: discourage multiple declarations on one line -->
+        <module name="MultipleVariableDeclarations"/>
+
+        <!-- Optional: ensure you don't forget to add block statements -->
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+        </module>
+
+        <!-- Optional: helps detect if/else blocks without curly braces -->
+        <module name="LeftCurly"/>
+        <module name="RightCurly"/>
+
     </module>
+
 </module>
