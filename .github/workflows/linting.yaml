@@ -20,14 +20,6 @@ jobs:
           mkdir -p .github/linters
           curl -sSL https://raw.githubusercontent.com/woped/devops/main/.github/linters/checkstyle.xml -o .github/linters/checkstyle.xml
 
-      - name: Debug Checkstyle Config Path
-        run: |
-          echo "Listing files at expected config location:"
-          ls 
-          echo "Contents of checkstyle.xml:"
-          cat .github/linters/checkstyle.xml
-
-
       - name: Lint Code Base
         uses: github/super-linter@v4
         env: 
@@ -35,5 +27,6 @@ jobs:
           VALIDATE_ALL_CODEBASE: false          # Only check files that have changed
           VALIDATE_MARKDOWN: false              # Ignore readme
           VALIDATE_NATURAL_LANGUAGE: false      # Ignore contributing guideline
+          VALIDATE_JAVA: true
           CHECKSTYLE_CONFIG_FILE: .github/linters/checkstyle.xml
           # VALIDATE_JAVA: false                # Please consider changing checkstyle.xml before using this.
