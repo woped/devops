@@ -15,6 +15,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download checkstyle.xml from devops repo
+        run: |
+          mkdir -p .github/linters
+          curl -sSL https://raw.githubusercontent.com/woped/devops/main/.github/linters/checkstyle.xml -o .github/linters/checkstyle.xml
+
       - name: Debug Checkstyle Config Path
         run: |
           echo "Listing files at expected config location:"
