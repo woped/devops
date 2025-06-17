@@ -19,7 +19,7 @@ jobs:
         uses: github/super-linter@v4
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false #Only check files that have changed
-          VALIDATE_MARKDOWN: false #ignore readme
-          VALIDATE_NATURAL_LANGUAGE: false #ignore contributing guideline
-          VALIDATE_JAVA: false #does not provide an option to NOT check for 80char per line
+          VALIDATE_ALL_CODEBASE: false          # Only check files that have changed
+          VALIDATE_MARKDOWN: false              # Ignore readme
+          VALIDATE_NATURAL_LANGUAGE: false      # Ignore contributing guideline
+          # VALIDATE_JAVA: false                # Please consider changing checkstyle.xml before using this.
