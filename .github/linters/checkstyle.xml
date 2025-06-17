@@ -4,6 +4,10 @@
     "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+    <!-- Reasonable line length limit -->
+    <module name="LineLength">
+        <property name="max" value="256"/>
+    </module>
 
     <!-- Set global file length limit -->
     <module name="FileLength">
@@ -14,11 +18,6 @@
     <module name="NewlineAtEndOfFile"/>
 
     <module name="TreeWalker">
-        
-        <!-- Reasonable line length limit -->
-        <module name="LineLength">
-            <property name="max" value="256"/>
-        </module>
 
         <!-- Prevent * imports -->
         <module name="AvoidStarImport"/>
