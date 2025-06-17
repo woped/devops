@@ -17,16 +17,16 @@ jobs:
 
       - name: Download checkstyle.xml from devops repo
         run: |
-          mkdir -p .github/linters
-          curl -sSL https://raw.githubusercontent.com/woped/devops/main/.github/linters/checkstyle.xml -o .github/linters/checkstyle.xml
+          mkdir -p .github/linter-configurations
+          curl -sSL https://raw.githubusercontent.com/woped/devops/main/.github/linter-configurations/checkstyle.xml -o .github/linter-configurations/checkstyle.xml
 
       - name: Lint Code Base
         uses: github/super-linter@v4
         env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false          # Only check files that have changed
-          VALIDATE_MARKDOWN: false              # Ignore readme
-          VALIDATE_NATURAL_LANGUAGE: false      # Ignore contributing guideline
-          # VALIDATE_JAVA: false                # Please consider changing checkstyle.xml before using this.
-          LINTER_RULES_PATH: /.github/linters/
-          JAVA_FILE_NAME: checkstyle.xml
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}             # Shows individual outputs per language
+          VALIDATE_ALL_CODEBASE: false                          # Only check files that have changed
+          VALIDATE_MARKDOWN: false                              # Ignore readme.md
+          VALIDATE_NATURAL_LANGUAGE: false                      # Ignore contributing guideline
+          # VALIDATE_JAVA: false                                # Would stop .java validation. Please consider changing checkstyle.xml before using this.
+          LINTER_RULES_PATH: /.github/linter-configurations/    # Path to config files
+          JAVA_FILE_NAME: checkstyle.xml              
