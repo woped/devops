@@ -27,5 +27,6 @@ jobs:
           VALIDATE_ALL_CODEBASE: false          # Only check files that have changed
           VALIDATE_MARKDOWN: false              # Ignore readme
           VALIDATE_NATURAL_LANGUAGE: false      # Ignore contributing guideline
-          JAVA_FILE_NAME: .github/linters/checkstyle.xml
           # VALIDATE_JAVA: false                # Please consider changing checkstyle.xml before using this.
+          LINTER_RULES_PATH: /.github/linters/
+          JAVA_FILE_NAME: checkstyle.xml
