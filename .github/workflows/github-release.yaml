@@ -14,13 +14,15 @@ on:
         type: string
     outputs:
       UPLOAD_URL:
-        value: ${{ steps.create_release.outputs.upload_url }}
+        value: ${{ jobs.publish_gh_release.outputs.UPLOAD_URL }}
 
 jobs:
   publish_gh_release:
     # run only if a new version is detected
     if: ${{ inputs.VERSION != '' && inputs.VERSION != '0.0.0' }}
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
+    outputs:
+      UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create release
         id: create_release
