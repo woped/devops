@@ -12,6 +12,9 @@ on:
       RELEASE_NOTES:
         required: true
         type: string
+    outputs:
+      UPLOAD_URL:
+        value: ${{ steps.create_release.outputs.upload_url }}
 
 jobs:
   publish_gh_release:
@@ -20,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest    
     steps:
       - name: Create release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ inputs.VERSION }}
