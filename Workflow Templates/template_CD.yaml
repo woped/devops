@@ -27,6 +27,8 @@ jobs:
 
   docker_build_and_push:
     uses: woped/devops/.github/workflows/docker-build-and-push.yaml@main
+    # For Java projects:
+    # uses: woped/devops/.github/workflows/docker-build-and-push-maven.yaml@main
     needs: [ semver, approval ]
     with:
       version: ${{ needs.semver.outputs.VERSION }}
