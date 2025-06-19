@@ -7,6 +7,12 @@ on:
         description: 'SemVer tag (e.g., 1.2.3)'
         required: true
         type: string
+      java_version:
+        description: 'Java version to use (default: 17)'
+        required: false
+        type: string
+        default: '17'
+
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -15,7 +21,6 @@ on:
 
 jobs:
   build-and-push:
-    # run only if a new version is detected
     if: ${{ inputs.version != '' && inputs.version != '0.0.0' }}
     runs-on: ubuntu-latest
 
@@ -27,7 +32,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: ${{ inputs.java_version }}
 
       - name: Build Java project with Maven
         run: mvn clean install --no-transfer-progress
