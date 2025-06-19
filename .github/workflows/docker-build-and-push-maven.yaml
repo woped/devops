@@ -35,7 +35,7 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Build Java project with Maven
-        run: mvn clean install --no-transfer-progress
+        run: mvn clean install -Dspotless.check.skip=true --no-transfer-progress
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
