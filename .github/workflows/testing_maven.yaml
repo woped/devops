@@ -43,8 +43,8 @@ jobs:
       # sometimes we need ui tests therefore we need to simulate a screen
       - name: Start Xvfb
         run: |
-          Xvfb :99 -screen 0 1024x768x24 &
-          export DISPLAY=:99
+          Xvfb :99 -screen 0 1024x768x24  &
+          sleep 2
 
       - name: Cache Maven packages
         if: steps.check_pom.outputs.found == 'true'
