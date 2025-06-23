@@ -61,6 +61,8 @@ jobs:
 
       - name: Build with Maven
         if: steps.check_pom.outputs.found == 'true'
+        env:
+          DISPLAY: :99
         run: mvn -B clean install
 
       - name: Run tests
