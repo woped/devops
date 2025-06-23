@@ -8,7 +8,7 @@ jobs:
     name: Execute Maven Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Check for pom.xml
         id: check_pom
@@ -27,6 +27,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+          settings-path: ${{ github.workspace }}
+
+      # woped main repo specific stuff
+      - uses: s4u/maven-settings-action@v2.5.0
+        with:
+          servers: '[{"id": "github","configuration": {"httpHeaders": {"property": {"name": "Authorization","value": "Bearer ${{ secrets.GITHUB_TOKEN }}"}}}}]'
 
       - name: Cache Maven packages
         if: steps.check_pom.outputs.found == 'true'
