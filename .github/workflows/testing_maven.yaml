@@ -33,6 +33,12 @@ jobs:
       - uses: s4u/maven-settings-action@v2.5.0
         with:
           servers: '[{"id": "github","configuration": {"httpHeaders": {"property": {"name": "Authorization","value": "Bearer ${{ secrets.GITHUB_TOKEN }}"}}}}]'
+          
+      # sometimes we need ui tests
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
 
       - name: Cache Maven packages
         if: steps.check_pom.outputs.found == 'true'
@@ -49,3 +55,5 @@ jobs:
       - name: Run tests
         if: steps.check_pom.outputs.found == 'true'
         run: mvn test
+        env:
+          DISPLAY: :99
