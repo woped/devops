@@ -46,6 +46,14 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24  &
           sleep 2
 
+      - name: Debug X11 setup
+        env:
+          DISPLAY: :99
+        run: |
+          echo "DISPLAY is: $DISPLAY"
+          ps aux | grep Xvfb
+          xdpyinfo -display :99 || echo "xdpyinfo failed"
+
       - name: Cache Maven packages
         if: steps.check_pom.outputs.found == 'true'
         uses: actions/cache@v3
