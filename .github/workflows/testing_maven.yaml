@@ -40,7 +40,7 @@ jobs:
         with:
           servers: '[{"id": "github","configuration": {"httpHeaders": {"property": {"name": "Authorization","value": "Bearer ${{ secrets.GITHUB_TOKEN }}"}}}}]'
           
-      # sometimes we need ui tests
+      # sometimes we need ui tests therefore we need to simulate a screen
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
@@ -60,6 +60,6 @@ jobs:
 
       - name: Run tests
         if: steps.check_pom.outputs.found == 'true'
-        run: mvn test
         env:
           DISPLAY: :99
+        run: mvn test
