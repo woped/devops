@@ -2,6 +2,12 @@ name: Sonar for Maven
 
 on:
   workflow_call:
+    inputs:
+      java_version:
+        description: 'Java version to use (default: 17)'
+        required: false
+        type: string
+        default: '17'
 
 jobs:
   build:
@@ -27,7 +33,7 @@ jobs:
         if: steps.check_pom.outputs.found == 'true'
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: ${{ inputs.java_version }}
           distribution: 'zulu' # Alternative distribution options are available.
 
       - name: Cache SonarQube packages
