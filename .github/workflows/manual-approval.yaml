@@ -25,6 +25,7 @@ jobs:
         with:
           secret: ${{ github.TOKEN }}
           approvers: nileger, Moritz010902
+          minimum-approvals: 1
           issue-title: "Manual approval neccessary for deployment"
           issue-body: "Please make sure that this repository is compatible with all the other services before procceeding."
           exclude-workflow-initiator-as-approver: false
