@@ -24,7 +24,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.TOKEN }}
-          approvers: nileger
+          approvers: nileger, leon2307
           minimum-approvals: 1
           issue-title: "Manual approval neccessary for deployment"
           issue-body: "Please make sure that this repository is compatible with all the other services before procceeding."
