@@ -19,7 +19,8 @@ jobs:
     name: Run Flask tests (reusable)
     uses: ./.github/workflows/testing_flask.yaml
     with:
-      FLASK_APP: ${{ inputs.flask_app }}
+      FLASK_APP: ${{ inputs.FLASK_APP }}
+      FLASK_ENV: ${{ inputs.FLASK_ENV }}
 
   sonarqube:
     name: SonarQube

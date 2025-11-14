@@ -56,8 +56,8 @@ jobs:
       - name: Run tests
         if: steps.check_flask.outputs.found == 'true'
         env:
-          FLASK_APP: ${{ inputs.flask_app }}
-          FLASK_ENV: ${{ inputs.flask_env }}
+          FLASK_APP: ${{ inputs.FLASK_APP }}
+          FLASK_ENV: ${{ inputs.FLASK_ENV }}
         run: |
           # Ensure we fail on pipe errors and initialize EXIT_CODE
           set -o pipefail
