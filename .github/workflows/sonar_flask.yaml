@@ -3,11 +3,15 @@ name: Sonar for Python
 on:
   workflow_call:
     inputs:
-      flask_app:
+      FLASK_APP:
         description: 'Optional FLASK_APP value to pass to the test workflow.'
         required: true
         type: string
-        default: ''
+      FLASK_ENV:
+        description: 'Optional FLASK_ENV value to pass to the test workflow.'
+        required: false
+        type: string
+        default: 'TESTING'
 
 
 jobs:

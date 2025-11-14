@@ -3,15 +3,14 @@ name: Python Flask Tests Workflow
 on:
   workflow_call:
     inputs:
-      flask_app:
+      FLASK_APP:
         description: 'Optional FLASK_APP value (module[:callable] or module:create_app()). If empty, the workflow will assume FLASK_APP is set in the repo or discoverable.'
         required: true
         type: string
-      flask_env:
+      FLASK_ENV:
         description: 'Optional FLASK_ENV value to set the Flask environment.'
-        required: false
+        required: true
         type: string
-        default: 'TESTING'
 
 
 jobs:
