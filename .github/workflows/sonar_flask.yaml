@@ -4,6 +4,34 @@ on:
   workflow_call:
 
 jobs:
+  env_check:
+    name: Environment Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Print runner information
+        run: |
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner temp: $RUNNER_TEMP"
+          uname -a || true
+
+      - name: Java version
+        run: java -version || echo "java not available"
+
+      - name: Python version
+        run: |
+          python3 --version || python --version || echo "python not available"
+
+      - name: Show coverage.xml if present
+        run: |
+          if [ -f coverage.xml ]; then
+            echo "coverage.xml found:"; ls -l coverage.xml; cat coverage.xml | sed -n '1,20p'
+          else
+            echo "coverage.xml not present in workspace"
+          fi
 
   sonarqube:
     name: SonarQube
