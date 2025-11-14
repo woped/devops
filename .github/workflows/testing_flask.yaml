@@ -2,6 +2,12 @@ name: Python Flask Tests Workflow
 
 on:
   workflow_call:
+    inputs:
+      flask_app:
+        description: 'Optional FLASK_APP value (module[:callable] or module:create_app()). If empty, the workflow will assume FLASK_APP is set in the repo or discoverable.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   build:
@@ -35,17 +41,31 @@ jobs:
           if [ -f requirements/test.txt ]; then
             echo "Installing from requirements/test.txt"
             pip install -r requirements/test.txt
-            pip install torch torchvision torchaudio pytest coverage
+            # Ensure flask and coverage are available for the test run
+            pip install torch torchvision torchaudio flask coverage
           else
             echo "requirements/test.txt not found, installing defaults"
-            pip install torch torchvision torchaudio pytest coverage
+            # Install minimal defaults; include flask and coverage
+            pip install torch torchvision torchaudio flask coverage
           fi
 
       - name: Run tests
         if: steps.check_py.outputs.found == 'true'
+        env:
+          FLASK_APP: ${{ inputs.flask_app }}
         run: |
+          # Ensure we fail on pipe errors and initialize EXIT_CODE
+          set -o pipefail
+          EXIT_CODE=0
+          if [ -n "$FLASK_APP" ]; then
+            echo "Using FLASK_APP='$FLASK_APP'"
+          else
+            echo "No FLASK_APP input provided — the workflow will rely on repository discovery or a default FLASK_APP."
+          fi
+          # Run the Flask CLI test command (requires a registered 'test' CLI command in the app)
           coverage run -m flask test || EXIT_CODE=$?
           coverage xml
+          # pytest (used internally by many test runners) returns 5 when no tests were collected
           if [ "$EXIT_CODE" -eq "5" ]; then
             echo "No tests were found. Skipping test phase."
             exit 0
