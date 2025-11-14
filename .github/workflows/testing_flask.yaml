@@ -5,9 +5,14 @@ on:
     inputs:
       flask_app:
         description: 'Optional FLASK_APP value (module[:callable] or module:create_app()). If empty, the workflow will assume FLASK_APP is set in the repo or discoverable.'
+        required: true
+        type: string
+      flask_env:
+        description: 'Optional FLASK_ENV value to set the Flask environment.'
         required: false
         type: string
-        default: ''
+        default: 'TESTING'
+
 
 jobs:
   build:
@@ -53,6 +58,7 @@ jobs:
         if: steps.check_flask.outputs.found == 'true'
         env:
           FLASK_APP: ${{ inputs.flask_app }}
+          FLASK_ENV: ${{ inputs.flask_env }}
         run: |
           # Ensure we fail on pipe errors and initialize EXIT_CODE
           set -o pipefail
