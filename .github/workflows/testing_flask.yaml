@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Check for Python files
-        id: check_py
+        id: check_flask
         run: |
           if git ls-files "*.py" | grep -q "."; then
             echo "Python files found"
@@ -29,13 +29,13 @@ jobs:
           fi
 
       - name: Set up Python
-        if: steps.check_py.outputs.found == 'true'
+        if: steps.check_flask.outputs.found == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
       - name: Install dependencies (requirements/test.txt or defaults)
-        if: steps.check_py.outputs.found == 'true'
+        if: steps.check_flask.outputs.found == 'true'
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements/test.txt ]; then
@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Run tests
-        if: steps.check_py.outputs.found == 'true'
+        if: steps.check_flask.outputs.found == 'true'
         env:
           FLASK_APP: ${{ inputs.flask_app }}
         run: |
@@ -78,7 +78,7 @@ jobs:
           fi
 
       - name: Upload coverage report
-        if: steps.check_py.outputs.found == 'true'
+        if: steps.check_flask.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report

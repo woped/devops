@@ -1,0 +1,76 @@
+name: Sonar for Python
+
+on:
+  workflow_call:
+    inputs:
+      flask_app:
+        description: 'Optional FLASK_APP value to pass to the test workflow.'
+        required: true
+        type: string
+        default: ''
+
+
+jobs:
+  test:
+    name: Run Flask tests (reusable)
+    uses: ./.github/workflows/testing_flask.yaml
+    with:
+      FLASK_APP: ${{ inputs.flask_app }}
+
+  sonarqube:
+    name: SonarQube
+    needs: test
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Python files
+        id: check_flask
+        run: |
+          if git ls-files "*.py" | grep -q "."; then
+            echo "Python files found"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Python files found"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      
+      - name: Download coverage report
+        if: steps.check_flask.outputs.found == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: Set up Java 125 (required by Sonar scanner)
+        if: steps.check_flask.outputs.found == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Print Java version
+        if: steps.check_flask.outputs.found == 'true'
+        run: java -version
+
+      - name: Cache SonarQube packages
+        if: steps.check_flask.outputs.found == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: SonarQube Scan
+        if: steps.check_flask.outputs.found == 'true'
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=woped
+            -Dsonar.projectKey=woped_${{ github.event.repository.name }}
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.verbose=true
