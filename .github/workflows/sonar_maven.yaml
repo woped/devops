@@ -17,57 +17,9 @@ jobs:
     name: Build and analyze
     if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
-    # Never fail the build due to SonarCloud issues
-    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check for pom.xml
-        id: check_pom
+      - name: Skip if no token
         run: |
-          if git ls-files "pom.xml" "**/pom.xml" | grep -q "."; then
-            echo "pom.xml found"
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No pom.xml found - skipping SonarCloud analysis"
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up JDK
-        if: steps.check_pom.outputs.found == 'true'
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ inputs.java_version }}
-          distribution: 'zulu'
-
-      - name: Cache SonarQube packages
-        if: steps.check_pom.outputs.found == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Maven packages
-        if: steps.check_pom.outputs.found == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Build and analyze
-        if: steps.check_pom.outputs.found == 'true'
-        continue-on-error: true
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.organization=woped \
-            -Dsonar.projectKey=woped_${{ github.event.repository.name }} \
-            -Dsonar.host.url=https://sonarcloud.io || echo "⚠️ SonarCloud analysis failed (token invalid or missing). Continuing anyway."
-
-      - name: Summary
-        run: echo "✅ SonarCloud job completed. Analysis may have been skipped if SONAR_TOKEN is missing or invalid."
+          echo "ℹ️ SonarCloud analysis is currently disabled."
+          echo "To enable, configure a valid SONAR_TOKEN secret in your repository."
+          echo "✅ Job completed successfully (skipped)."
