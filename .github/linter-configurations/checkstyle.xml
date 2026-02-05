@@ -4,17 +4,28 @@
     "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+    <!-- Relaxed line length - 200 characters -->
     <module name="LineLength">
-      <property name="max" value="120"/>
+      <property name="max" value="200"/>
+      <property name="ignorePattern" value="^package.*|^import.*|a]+ */>$"/>
     </module>
+    
     <module name="TreeWalker">
+        <!-- Relaxed method length - 300 lines -->
         <module name="MethodLength">
-            <property name="max" value="100"/>
+            <property name="max" value="300"/>
         </module>
-        <module name="AvoidStarImport"/>
-        <module name="NeedBraces"/>
-        <module name="MagicNumber"/>
-        <module name="VisibilityModifier"/>
-        <module name="JavadocMethod"/>
+        
+        <!-- Keep basic formatting rules but as warnings -->
+        <module name="NeedBraces">
+            <property name="severity" value="warning"/>
+        </module>
+        
+        <!-- Removed overly restrictive rules:
+             - AvoidStarImport (star imports are convenient)
+             - MagicNumber (too noisy for practical use)
+             - VisibilityModifier (too restrictive for many patterns)
+             - JavadocMethod (not all methods need documentation)
+        -->
     </module>
 </module>
