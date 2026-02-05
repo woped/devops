@@ -8,6 +8,9 @@ on:
         required: false
         type: string
         default: '17'
+    secrets:
+      SONAR_TOKEN:
+        required: false
 
 jobs:
   build:
@@ -30,15 +33,26 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check for SONAR_TOKEN
+        id: check_token
+        run: |
+          if [ -n "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "SONAR_TOKEN is configured"
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "⚠️ SONAR_TOKEN not configured - skipping SonarCloud analysis"
+            echo "has_token=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up JDK 17
-        if: steps.check_pom.outputs.found == 'true'
+        if: steps.check_pom.outputs.found == 'true' && steps.check_token.outputs.has_token == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: ${{ inputs.java_version }}
-          distribution: 'zulu' # Alternative distribution options are available.
+          distribution: 'zulu'
 
       - name: Cache SonarQube packages
-        if: steps.check_pom.outputs.found == 'true'
+        if: steps.check_pom.outputs.found == 'true' && steps.check_token.outputs.has_token == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
@@ -46,7 +60,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache Maven packages
-        if: steps.check_pom.outputs.found == 'true'
+        if: steps.check_pom.outputs.found == 'true' && steps.check_token.outputs.has_token == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.m2
@@ -54,7 +68,11 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and analyze
-        if: steps.check_pom.outputs.found == 'true'
+        if: steps.check_pom.outputs.found == 'true' && steps.check_token.outputs.has_token == 'true'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=woped -Dsonar.projectKey=woped_${{ github.event.repository.name }} -Dsonar.host.url=https://sonarcloud.io
+
+      - name: Skip notice
+        if: steps.check_token.outputs.has_token == 'false'
+        run: echo "✅ SonarCloud analysis skipped (no SONAR_TOKEN configured). Build successful."
