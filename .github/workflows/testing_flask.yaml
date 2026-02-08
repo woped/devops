@@ -16,6 +16,10 @@ on:
         description: 'Optional E2E_URL for end-to-end testing.'
         required: false
         type: string
+      e2e_identity_token:
+        description: 'Optional E2E_IDENTITY_TOKEN for end-to-end testing authentication.'
+        required: false
+        type: string
 
 
 jobs:
@@ -61,6 +65,7 @@ jobs:
           FLASK_APP: ${{ inputs.flask_app }}
           FLASK_ENV: ${{ inputs.flask_env }}
           E2E_URL: ${{ inputs.e2e_url }}
+          E2E_IDENTITY_TOKEN: ${{ inputs.e2e_identity_token }}
         run: |
           # Ensure we fail on pipe errors and initialize EXIT_CODE
           set -o pipefail
