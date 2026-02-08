@@ -12,6 +12,10 @@ on:
         required: false
         type: string
         default: 'testing'
+      e2e_url:
+        description: 'Optional E2E_URL for end-to-end testing.'
+        required: false
+        type: string
 
 
 jobs:
@@ -56,6 +60,7 @@ jobs:
         env:
           FLASK_APP: ${{ inputs.flask_app }}
           FLASK_ENV: ${{ inputs.flask_env }}
+          E2E_URL: ${{ inputs.e2e_url }}
         run: |
           # Ensure we fail on pipe errors and initialize EXIT_CODE
           set -o pipefail
