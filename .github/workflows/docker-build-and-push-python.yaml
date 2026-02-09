@@ -1,0 +1,146 @@
+name: Docker Build and Push (Python)
+
+permissions:
+  contents: write
+
+on:
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Read version from version.py
+        id: version
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import sys
+          import pathlib
+          import importlib.util
+
+          path = pathlib.Path("version.py")
+          if not path.exists():
+              print("version.py not found at repository root", file=sys.stderr)
+              sys.exit(1)
+
+          spec = importlib.util.spec_from_file_location("version", str(path))
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          version = getattr(module, "__version__", "").strip()
+          if not version:
+              print("__version__ not set in version.py", file=sys.stderr)
+              sys.exit(1)
+
+          semver_pattern = r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$"
+          if not re.match(semver_pattern, version):
+              print(f"Invalid SemVer in __version__: {version}", file=sys.stderr)
+              sys.exit(1)
+
+          major, minor, patch = version.split(".", 2)
+          skip = "true" if version == "0.0.0" else "false"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"version={version}\n")
+              output.write(f"major={major}\n")
+              output.write(f"minor={minor}\n")
+              output.write(f"patch={patch}\n")
+              output.write(f"skip={skip}\n")
+          PY
+
+      - name: Set up Docker Buildx
+        if: ${{ steps.version.outputs.skip != 'true' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        if: ${{ steps.version.outputs.skip != 'true' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: ${{ steps.version.outputs.skip != 'true' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.version }}
+            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
+            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.major }}
+            woped/${{ github.event.repository.name }}:sha-${{ github.sha }}
+            woped/${{ github.event.repository.name }}:latest
+
+      - name: Bump patch version in version.py
+        if: ${{ steps.version.outputs.skip != 'true' && github.actor != 'github-actions[bot]' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          path = Path("version.py")
+          text = path.read_text(encoding="utf-8")
+
+          match = re.search(r"__version__\s*=\s*\"([^\"]+)\"", text)
+          if not match:
+              print("__version__ not found in version.py", file=sys.stderr)
+              sys.exit(1)
+
+          current = match.group(1)
+          if "-" in current or "+" in current:
+              print(f"Skipping bump for prerelease/build version: {current}")
+              sys.exit(0)
+
+          parts = current.split(".")
+          if len(parts) != 3 or not all(p.isdigit() for p in parts):
+              print(f"Invalid SemVer for patch bump: {current}", file=sys.stderr)
+              sys.exit(1)
+
+          major, minor, patch = map(int, parts)
+          patch += 1
+          new_version = f"{major}.{minor}.{patch}"
+
+          updated = re.sub(
+              r"__version__\s*=\s*\"([^\"]+)\"",
+              f"__version__ = \"{new_version}\"",
+              text,
+              count=1,
+          )
+          path.write_text(updated, encoding="utf-8")
+          print(f"Bumped __version__ to {new_version}")
+          PY
+
+      - name: Commit and push version bump
+        if: ${{ steps.version.outputs.skip != 'true' && github.actor != 'github-actions[bot]' }}
+        shell: bash
+        run: |
+          git status --porcelain
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No version changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.py
+          git commit -m "chore: bump patch version [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
