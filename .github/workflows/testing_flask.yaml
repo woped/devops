@@ -75,8 +75,18 @@ jobs:
           else
             echo "No FLASK_APP input provided — the workflow will rely on repository discovery or a default FLASK_APP."
           fi
+          
+          # Determine pytest arguments based on E2E_URL presence
+          if [ -z "${{ inputs.e2e_url }}" ]; then
+            echo "E2E_URL not provided - skipping E2E tests (running with -m 'not e2e')"
+            export PYTEST_ARGS="-m 'not e2e'"
+          else
+            echo "E2E_URL provided: ${{ inputs.e2e_url }} - running all tests including E2E"
+            export PYTEST_ARGS=""
+          fi
+          
           # Run the Flask CLI test command (requires a registered 'test' CLI command in the app)
-          coverage run -m flask test || EXIT_CODE=$?
+          coverage run -m flask test $PYTEST_ARGS || EXIT_CODE=$?
           coverage xml
           # pytest (used internally by many test runners) returns 5 when no tests were collected
           if [ "$EXIT_CODE" -eq "5" ]; then
