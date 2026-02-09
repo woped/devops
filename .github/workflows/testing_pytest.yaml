@@ -41,12 +41,18 @@ jobs:
         if: steps.check_py.outputs.found == 'true'
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
+          # Search for test requirements in requirements/ directory
+          TEST_REQ_FILE=$(find requirements -type f -name "*test*" 2>/dev/null | head -n 1)
+          if [ -n "$TEST_REQ_FILE" ]; then
+            echo "Installing from $TEST_REQ_FILE"
+            pip install -r "$TEST_REQ_FILE"
+            pip install torch torchvision torchaudio pytest
+          elif [ -f requirements.txt ]; then
             echo "Installing from requirements.txt"
             pip install -r requirements.txt
             pip install torch torchvision torchaudio pytest
           else
-            echo "requirements.txt not found, installing defaults"
+            echo "No requirements file found, installing defaults"
             pip install torch torchvision torchaudio pytest
           fi
 
