@@ -65,6 +65,36 @@ jobs:
               output.write(f"skip={skip}\n")
           PY
 
+      - name: Populate build metadata in version.py
+        if: ${{ steps.version.outputs.skip != 'true' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          path = Path("version.py")
+          text = path.read_text(encoding="utf-8")
+
+          build_date = datetime.now(timezone.utc).isoformat()
+          git_commit = "${{ github.sha }}"
+
+          text = re.sub(
+              r"__build_date__\s*=\s*None",
+              f"__build_date__ = \"{build_date}\"",
+              text
+          )
+          text = re.sub(
+              r"__git_commit__\s*=\s*None",
+              f"__git_commit__ = \"{git_commit}\"",
+              text
+          )
+
+          path.write_text(text, encoding="utf-8")
+          print(f"Updated version.py with build_date={build_date} and git_commit={git_commit}")
+          PY
+
       - name: Set up Docker Buildx
         if: ${{ steps.version.outputs.skip != 'true' }}
         uses: docker/setup-buildx-action@v3
