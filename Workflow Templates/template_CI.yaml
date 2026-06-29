@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, develop ]
   push:
-    branches: [ main, master ]
+    branches: [ main, master, develop ]
 
 jobs:
   validate_commit_messages:
