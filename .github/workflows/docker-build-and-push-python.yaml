@@ -5,6 +5,11 @@ permissions:
 
 on:
   workflow_call:
+    inputs:
+      tag:
+        description: 'Git tag to use for image tagging (e.g., v1.2.3)'
+        required: false
+        type: string
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -19,102 +24,61 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Read version from version.py
-        id: version
+      - name: Resolve release tag and image metadata
+        id: image_meta
         shell: bash
         run: |
-          python - <<'PY'
-          import os
-          import re
-          import sys
-          import pathlib
-          import importlib.util
+          IMAGE_NAME="${GITHUB_REPOSITORY#*/}"
 
-          path = pathlib.Path("version.py")
-          if not path.exists():
-              print("version.py not found at repository root", file=sys.stderr)
-              sys.exit(1)
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          elif [ "${{ github.ref_type }}" = "tag" ] && [ -n "${{ github.ref_name }}" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            echo "Could not determine tag. Pass inputs.tag or run this workflow from a tag ref."
+            exit 1
+          fi
 
-          spec = importlib.util.spec_from_file_location("version", str(path))
-          module = importlib.util.module_from_spec(spec)
-          spec.loader.exec_module(module)
+          if [ -z "$TAG" ]; then
+            echo "Could not determine Docker image tag"
+            exit 1
+          fi
 
-          version = getattr(module, "__version__", "").strip()
-          if not version:
-              print("__version__ not set in version.py", file=sys.stderr)
-              sys.exit(1)
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "Tag must be in format v<semver>, got: $TAG"
+            exit 1
+          fi
 
-          semver_pattern = r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$"
-          if not re.match(semver_pattern, version):
-              print(f"Invalid SemVer in __version__: {version}", file=sys.stderr)
-              sys.exit(1)
+          MAJOR="${VERSION%%.*}"
+          REST="${VERSION#*.}"
+          MINOR="${REST%%.*}"
 
-          major, minor, patch = version.split(".", 2)
-          skip = "true" if version == "0.0.0" else "false"
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"version={version}\n")
-              output.write(f"major={major}\n")
-              output.write(f"minor={minor}\n")
-              output.write(f"patch={patch}\n")
-              output.write(f"skip={skip}\n")
-          PY
-
-      - name: Populate build metadata in version.py
-        if: ${{ steps.version.outputs.skip != 'true' }}
-        shell: bash
-        run: |
-          python - <<'PY'
-          import re
-          from pathlib import Path
-          from datetime import datetime, timezone
-
-          path = Path("version.py")
-          text = path.read_text(encoding="utf-8")
-
-          build_date = datetime.now(timezone.utc).isoformat()
-          git_commit = "${{ github.sha }}"
-
-          text = re.sub(
-              r"__build_date__\s*=\s*None",
-              f"__build_date__ = \"{build_date}\"",
-              text
-          )
-          text = re.sub(
-              r"__git_commit__\s*=\s*None",
-              f"__git_commit__ = \"{git_commit}\"",
-              text
-          )
-
-          path.write_text(text, encoding="utf-8")
-          print(f"Updated version.py with build_date={build_date} and git_commit={git_commit}")
-          PY
+          echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major=$MAJOR" >> "$GITHUB_OUTPUT"
+          echo "minor=$MINOR" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
-        if: ${{ steps.version.outputs.skip != 'true' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        if: ${{ steps.version.outputs.skip != 'true' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: ${{ steps.version.outputs.skip != 'true' }}
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.version }}
-            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
-            woped/${{ github.event.repository.name }}:${{ steps.version.outputs.major }}
-            woped/${{ github.event.repository.name }}:sha-${{ github.sha }}
-            woped/${{ github.event.repository.name }}:latest
+            woped/${{ steps.image_meta.outputs.image_name }}:${{ steps.image_meta.outputs.tag }}
+            woped/${{ steps.image_meta.outputs.image_name }}:${{ steps.image_meta.outputs.version }}
+            woped/${{ steps.image_meta.outputs.image_name }}:${{ steps.image_meta.outputs.major }}.${{ steps.image_meta.outputs.minor }}
+            woped/${{ steps.image_meta.outputs.image_name }}:${{ steps.image_meta.outputs.major }}
+            woped/${{ steps.image_meta.outputs.image_name }}:sha-${{ github.sha }}
+            woped/${{ steps.image_meta.outputs.image_name }}:latest

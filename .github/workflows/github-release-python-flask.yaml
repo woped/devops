@@ -1,0 +1,45 @@
+name: Publish GitHub release (Python Flask)
+
+permissions:
+  contents: write
+
+on:
+  workflow_call:
+    inputs:
+      TAG:
+        description: Git tag to release (for example v1.2.3)
+        required: true
+        type: string
+      RELEASE_NOTES:
+        required: true
+        type: string
+    outputs:
+      UPLOAD_URL:
+        value: ${{ jobs.publish_gh_release.outputs.UPLOAD_URL }}
+
+jobs:
+  publish_gh_release:
+    # run only if a valid tag is provided
+    if: ${{ inputs.TAG != '' && inputs.TAG != 'v0.0.0' }}
+    runs-on: ubuntu-latest
+    outputs:
+      UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Validate release tag
+        shell: bash
+        run: |
+          if [[ ! "${{ inputs.TAG }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid TAG format: '${{ inputs.TAG }}'. Expected v<semver>."
+            exit 1
+          fi
+
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ inputs.TAG }}
+          name: ${{ inputs.TAG }}
+          body: ${{ inputs.RELEASE_NOTES }}
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
